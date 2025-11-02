@@ -482,7 +482,7 @@ A learning project exploring modern ML deployment patterns with FastAPI and PyTo
 
 ## 📞 Support
 
-- 📧 Email: your.email@example.com
+- 📧 Email: vrajgavade17@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/wine-quality-api/issues)
 - 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/wine-quality-api/discussions)
 
