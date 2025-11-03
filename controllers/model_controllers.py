@@ -27,7 +27,7 @@ logging.basicConfig(
 def train_neural_network(params: TrainingParameters):
     try:
         logging.info("Starting training process...")
-        logging.info(f"Received parameters: {params.model_dump()}")
+        logging.info(f"Received parameters: {params}")
 
         if params.model_type == "classification":
             target_col = "type"
@@ -104,7 +104,7 @@ def train_neural_network(params: TrainingParameters):
 def test_neural_network(params: TrainingParameters):
     try:
         logging.info("Starting model evaluation...")
-        logging.info(f"Received parameters: {params.model_dump()}")
+        logging.info(f"Received parameters: {params}")
 
         if params.model_type == "classification":
             target_col = "type"
@@ -160,7 +160,7 @@ def test_neural_network(params: TrainingParameters):
 
 def predict_output(params: PredictionParameters):
     try:
-        logging.info(f"Received prediction request: {params.model_dump()}")
+        logging.info(f"Received prediction request: {params}")
 
         # load the model
         if params.model_type == "classification":
