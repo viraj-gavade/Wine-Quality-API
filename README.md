@@ -489,3 +489,25 @@ A learning project exploring modern ML deployment patterns with FastAPI and PyTo
 ---
 
 **⭐ If you find this project helpful, please consider giving it a star!**
+
+---
+
+## 🚢 Deploying to Render (quick)
+
+Render is a simple choice for quickly deploying containerized services from a Git repository. This repo includes a `Dockerfile` and reads important runtime paths from environment variables (`DATA_PATH`, `MODEL_DIR`) so the service can be configured in Render's dashboard.
+
+Quick Render steps:
+
+1. Push your repository to GitHub (or another supported Git provider).
+2. In Render, create a new **Web Service** and connect your repo + branch.
+3. Configure the service to use the repository `Dockerfile` (Render usually auto-detects it).
+4. Set environment variables in the Render service settings:
+  - `DATA_PATH` → path inside the container where your CSV is available (e.g. `/app/data/proccessed_winequality.csv`)
+  - `MODEL_DIR` → directory for model weights (e.g. `/app/Models/trained`)
+5. (Optional) Upload or mount any pre-trained models or datasets to Render persistent disks or include them in the repo.
+
+Notes:
+- Render provides CPU-only instances (no GPU). For GPU-enabled workloads, use a cloud VM with GPU or managed ML infra.
+- If you prefer a Git-based auto-deploy without Docker, Render can also detect Python apps, but Docker offers more reproducibility.
+
+If you'd like, I can add a `render.yaml` or a GitHub Actions workflow to auto-deploy on push and an example `.env` for Render's environment settings.

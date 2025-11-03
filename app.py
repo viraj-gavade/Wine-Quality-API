@@ -29,6 +29,12 @@ def home():
     return {"message": "✅ FastAPI is running successfully!"}
 
 
+@app.get('/health')
+def health():
+    """Simple health endpoint for readiness checks."""
+    return {"status": "healthy"}
+
+
 
 
 

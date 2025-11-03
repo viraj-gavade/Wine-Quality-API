@@ -1,3 +1,4 @@
+import os
 import torch
 import logging
 from datetime import datetime
@@ -10,7 +11,9 @@ from src.regression_model import WineQualityRegressionNN
 from src.testing_pipeline import evaluate_model
 from Schemas.prediction_model import PredictionParameters
 
-file_path = r"D:\PyTorch\Wine Quality API\data\proccessed_winequality.csv"
+# Use environment variables for paths so containers / platforms can override them
+DATA_PATH = os.environ.get("DATA_PATH", "data/proccessed_winequality.csv")
+MODEL_DIR = os.environ.get("MODEL_DIR", "Models/trained")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,14 +36,17 @@ def train_neural_network(params: TrainingParameters):
         else:
             raise ValueError("Invalid model_type. Choose 'classification' or 'regression'.")
 
-        df = load_data(file_path)
+        # Load and prepare data
+        df = load_data(DATA_PATH)
         train_loader, _ = process_data(df, output_feature=target_col)
 
+        # Create model
         if params.model_type == "classification":
             model = WineTypePredictionNN(num_features=12)
         else:
             model = WineQualityRegressionNN(num_features=12)
 
+        # Optimizer
         if params.optimizer == "Adam":
             optimizer = torch.optim.Adam(model.parameters(), lr=params.learning_rate)
         elif params.optimizer == "SGD":
@@ -50,6 +56,7 @@ def train_neural_network(params: TrainingParameters):
         else:
             raise ValueError("Unsupported optimizer selected.")
 
+        # Loss validation
         if params.model_type == "classification" and params.loss_function != "CrossEntropyLoss":
             raise ValueError("Classification requires CrossEntropyLoss.")
         if params.model_type == "regression" and params.loss_function not in ["MSELoss", "MAELoss"]:
@@ -64,9 +71,11 @@ def train_neural_network(params: TrainingParameters):
         else:
             raise ValueError("Invalid loss function specified.")
 
+        # Name for saved model
         model_save_name = f"{params.model_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
-        model_path = f"Models/trained/{model_save_name}"
+        model_path = f"{MODEL_DIR}/{model_save_name}"
 
+        # Run training pipeline (this function is defined in src.training_pipeline)
         train_model(
             epochs=params.epochs,
             train_loader=train_loader,
@@ -104,7 +113,7 @@ def test_neural_network(params: TrainingParameters):
         else:
             raise ValueError("Invalid model_type. Choose 'classification' or 'regression'.")
 
-        df = load_data(file_path)
+        df = load_data(DATA_PATH)
         _, test_loader = process_data(df, output_feature=target_col)
 
         if params.model_type == "classification":
@@ -112,7 +121,7 @@ def test_neural_network(params: TrainingParameters):
         else:
             model = WineQualityRegressionNN(num_features=12)
 
-        model_path = f"Models/trained/{params.model_file_name}"
+        model_path = f"{MODEL_DIR}/{params.model_file_name}"
         model.load_state_dict(torch.load(model_path, map_location="cpu"))
         model.eval()
 
@@ -149,8 +158,7 @@ def test_neural_network(params: TrainingParameters):
         return {"status": "Model evaluation failed", "error": str(e)}
 
 
-
-def predict_output(params :PredictionParameters ):
+def predict_output(params: PredictionParameters):
     try:
         logging.info(f"Received prediction request: {params.model_dump()}")
 
@@ -162,7 +170,7 @@ def predict_output(params :PredictionParameters ):
         else:
             raise ValueError("Invalid model type")
 
-        model_path = f"Models/trained/{params.model_file_name}"
+        model_path = f"{MODEL_DIR}/{params.model_file_name}"
         model.load_state_dict(torch.load(model_path, map_location=params.device))
         model.to(params.device)
         model.eval()
