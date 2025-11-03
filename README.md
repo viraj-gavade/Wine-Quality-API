@@ -6,8 +6,21 @@ A modular FastAPI backend that serves PyTorch neural network models for wine ana
 
 ---
 
+## 🌐 Live Demo
+
+**🚀 Try it now:** [https://wine-quality-api-gidk.onrender.com](https://wine-quality-api-gidk.onrender.com)
+
+- **Interactive API Docs (Swagger UI)**: [https://wine-quality-api-gidk.onrender.com/docs](https://wine-quality-api-gidk.onrender.com/docs)
+- **API Documentation (ReDoc)**: [https://wine-quality-api-gidk.onrender.com/redoc](https://wine-quality-api-gidk.onrender.com/redoc)
+- **API Base URL**: `https://wine-quality-api-gidk.onrender.com/model`
+
+> ⚠️ **Note:** Free-tier hosting may experience cold starts (~30-60 seconds) on the first request after inactivity.
+
+---
+
 ## 📋 Table of Contents
 
+- [Live Demo](#-live-demo)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
@@ -31,6 +44,7 @@ A modular FastAPI backend that serves PyTorch neural network models for wine ana
 - **📝 Structured Logging**: Detailed logs for debugging and monitoring
 - **✅ Request Validation**: Pydantic schemas ensure data integrity
 - **📚 Auto Documentation**: Interactive API docs via Swagger UI
+- **🌐 Cloud Deployment**: Live production deployment on Render
 
 ---
 
@@ -42,6 +56,7 @@ A modular FastAPI backend that serves PyTorch neural network models for wine ana
 | **ML Library** | PyTorch |
 | **Validation** | Pydantic |
 | **Server** | Uvicorn |
+| **Deployment** | Render |
 | **Language** | Python 3.x |
 
 ---
@@ -105,13 +120,22 @@ wine-quality-api/
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Use the Live API (Recommended for Testing)
+
+Simply visit the Swagger UI and start making requests:
+- **Swagger UI**: [https://wine-quality-api-gidk.onrender.com/docs](https://wine-quality-api-gidk.onrender.com/docs)
+
+No installation required! 🎉
+
+### Option 2: Run Locally
+
+#### Prerequisites
 
 - Python 3.8 or higher
 - pip package manager
 - (Optional) CUDA-compatible GPU for faster training
 
-### Installation
+#### Installation
 
 1. **Clone the repository**
    ```bash
@@ -147,7 +171,7 @@ wine-quality-api/
    uvicorn app:app --reload --host 0.0.0.0 --port 8000
    ```
 
-6. **Access the API**
+6. **Access the local API**
    - **Swagger UI**: http://127.0.0.1:8000/docs
    - **ReDoc**: http://127.0.0.1:8000/redoc
    - **API Base**: http://127.0.0.1:8000/model
@@ -157,6 +181,10 @@ wine-quality-api/
 ## 📡 API Reference
 
 All endpoints are mounted under the `/model` prefix.
+
+### Base URLs
+- **Production**: `https://wine-quality-api-gidk.onrender.com/model`
+- **Local**: `http://127.0.0.1:8000/model`
 
 ### 1. Train Model
 
@@ -288,7 +316,7 @@ Run inference on new data using a trained model.
 
 ## 💡 Usage Examples
 
-### Training a Classification Model
+### Training a Classification Model (Production)
 
 **PowerShell:**
 ```powershell
@@ -302,12 +330,12 @@ $body = @{
     model_file_name = "wine_classifier_v1.pth"
 } | ConvertTo-Json
 
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/model/train/" -Method POST -Body $body -ContentType "application/json"
+Invoke-RestMethod -Uri "https://wine-quality-api-gidk.onrender.com/model/train/" -Method POST -Body $body -ContentType "application/json"
 ```
 
 **cURL:**
 ```bash
-curl -X POST "http://127.0.0.1:8000/model/train/" \
+curl -X POST "https://wine-quality-api-gidk.onrender.com/model/train/" \
   -H "Content-Type: application/json" \
   -d '{
     "model_type": "classification",
@@ -324,6 +352,9 @@ curl -X POST "http://127.0.0.1:8000/model/train/" \
 ```python
 import requests
 
+# Use production API
+BASE_URL = "https://wine-quality-api-gidk.onrender.com"
+
 payload = {
     "model_type": "classification",
     "epochs": 100,
@@ -335,7 +366,7 @@ payload = {
 }
 
 response = requests.post(
-    "http://127.0.0.1:8000/model/train/",
+    f"{BASE_URL}/model/train/",
     json=payload
 )
 print(response.json())
@@ -343,11 +374,13 @@ print(response.json())
 
 ---
 
-### Making Predictions
+### Making Predictions (Production)
 
 **Python:**
 ```python
 import requests
+
+BASE_URL = "https://wine-quality-api-gidk.onrender.com"
 
 # Sample wine features
 wine_sample = [7.4, 0.7, 0.0, 1.9, 0.076, 11.0, 34.0, 0.9978, 3.51, 0.56, 9.4, 0.0]
@@ -360,13 +393,38 @@ payload = {
 }
 
 response = requests.post(
-    "http://127.0.0.1:8000/model/predict",
+    f"{BASE_URL}/model/predict",
     json=payload
 )
 
 result = response.json()
 wine_type = "White Wine" if result["predictions"][0] == 1 else "Red Wine"
 print(f"Prediction: {wine_type}")
+```
+
+**JavaScript (Fetch):**
+```javascript
+const BASE_URL = "https://wine-quality-api-gidk.onrender.com";
+
+const wineSample = [7.4, 0.7, 0.0, 1.9, 0.076, 11.0, 34.0, 0.9978, 3.51, 0.56, 9.4, 0.0];
+
+const payload = {
+  model_type: "classification",
+  model_file_name: "wine_classifier_v1.pth",
+  input_data: [wineSample],
+  device: "cpu"
+};
+
+fetch(`${BASE_URL}/model/predict`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload)
+})
+  .then(res => res.json())
+  .then(data => {
+    const wineType = data.predictions[0] === 1 ? "White Wine" : "Red Wine";
+    console.log(`Prediction: ${wineType}`);
+  });
 ```
 
 ---
@@ -477,14 +535,28 @@ A learning project exploring modern ML deployment patterns with FastAPI and PyTo
 - FastAPI framework for excellent developer experience
 - PyTorch team for the powerful ML library
 - UCI Machine Learning Repository for the wine quality dataset
+- Render for reliable free-tier hosting
 
 ---
 
 ## 📞 Support
 
-- 📧 Email: vrajgavade17@gmail.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/wine-quality-api/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/wine-quality-api/discussions)
+- 🌐 **Live API**: [https://wine-quality-api-gidk.onrender.com/docs](https://wine-quality-api-gidk.onrender.com/docs)
+- 📧 **Email**: vrajgavade17@gmail.com
+- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/wine-quality-api/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/wine-quality-api/discussions)
+
+---
+
+## 🚀 Deployment
+
+This API is deployed on Render's free tier. For your own deployment:
+
+1. Fork this repository
+2. Connect your GitHub repo to Render
+3. Configure build command: `pip install -r requirements.txt`
+4. Configure start command: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+5. Deploy! 🎉
 
 ---
 
